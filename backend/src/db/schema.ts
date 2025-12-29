@@ -1,4 +1,4 @@
-import { mysqlTable, int, varchar, text, decimal, datetime, timestamp, index, mysqlEnum } from 'drizzle-orm/mysql-core';
+import { mysqlTable, int, varchar, text, decimal, datetime, timestamp, index, mysqlEnum, json, sql } from 'drizzle-orm/mysql-core';
 
 export type Platform = 'steam' | 'epic' | 'gog';
 export type SyncType = 'full' | 'delta' | 'manual';
@@ -71,6 +71,7 @@ export const priceHistory = mysqlTable('price_history', {
 }, (table) => ({
   gamePlatformIdIdx: index('price_gp_id_idx').on(table.gamePlatformId),
   recordedAtIdx: index('price_recorded_at_idx').on(table.recordedAt),
+  gpRecordedIdx: index('idx_price_history_gp_recorded').on(table.gamePlatformId, sql`recorded_at DESC`),
 }));
 
 export const gamePlatforms = mysqlTable('game_platforms', {
@@ -94,6 +95,9 @@ export const gamePlatforms = mysqlTable('game_platforms', {
   platformIdIdx: index('gp_platform_id_idx').on(table.platformId),
   platformPriceIdx: index('gp_platform_price_idx').on(table.platformPrice),
   availableIdx: index('gp_available_idx').on(table.available),
+  pricePlatformIdx: index('idx_game_platforms_price_platform').on(table.platformPrice, table.platform),
+  availablePlatformIdx: index('idx_game_platforms_available_platform').on(table.available, table.platform),
+  discountPriceIdx: index('idx_game_platforms_discount_price').on(table.discountPercent, table.platformPrice),
 }));
 
 export const platformSyncLog = mysqlTable('platform_sync_log', {
@@ -110,4 +114,25 @@ export const platformSyncLog = mysqlTable('platform_sync_log', {
   platformIdx: index('psl_platform_idx').on(table.platform),
   statusIdx: index('psl_status_idx').on(table.status),
   startedAtIdx: index('psl_started_at_idx').on(table.startedAt),
+}));
+
+export const gameComparisonCache = mysqlTable('game_comparison_cache', {
+  id: int('id').primaryKey().autoincrement(),
+  gameId: int('game_id').notNull().references(() => games.id, { onDelete: 'cascade' }),
+  comparisonData: json('comparison_data').notNull(),
+  lastUpdated: timestamp('last_updated').notNull().defaultNow().onUpdateNow(),
+}, (table) => ({
+  gameIdIdx: index('gcc_game_id_idx').on(table.gameId),
+  lastUpdatedIdx: index('gcc_last_updated_idx').on(table.lastUpdated),
+}));
+
+export const popularSearches = mysqlTable('popular_searches', {
+  id: int('id').primaryKey().autoincrement(),
+  query: varchar('query', { length: 500 }).notNull(),
+  searchCount: int('search_count').notNull().default(1),
+  lastSearched: timestamp('last_searched').notNull().defaultNow().onUpdateNow(),
+}, (table) => ({
+  queryIdx: index('ps_query_idx').on(table.query),
+  searchCountIdx: index('ps_search_count_idx').on(table.searchCount),
+  lastSearchedIdx: index('ps_last_searched_idx').on(table.lastSearched),
 }));
