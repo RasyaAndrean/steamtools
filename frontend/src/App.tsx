@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import Search from './pages/Search';
 import Library from './pages/Library';
 import Tracking from './pages/Tracking';
 import GameDetails from './pages/GameDetails';
@@ -14,6 +15,7 @@ export default function App() {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/search" element={<Search />} />
             <Route path="/library" element={<Library />} />
             <Route path="/tracking" element={<Tracking />} />
             <Route path="/game/:id" element={<GameDetails />} />

@@ -16,6 +16,12 @@ export default function Header() {
               HOME
             </Link>
             <Link 
+              to="/search" 
+              className="text-lg font-semibold hover:underline decoration-5 underline-offset-8"
+            >
+              SEARCH
+            </Link>
+            <Link 
               to="/library" 
               className="text-lg font-semibold hover:underline decoration-5 underline-offset-8"
             >
